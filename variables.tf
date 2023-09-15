@@ -26,8 +26,8 @@ variable "private_subnets_cidr" {
   type        = list(string)
 }
 
-variable "avaialability_zones" {
-  description = "List of avaialability zones"
+variable "availability_zones" {
+  description = "List of availability zones"
   type        = list(string)
 }
 
@@ -134,22 +134,22 @@ variable "pub_rt_name" {
 }
 
 variable "pub_subnet_name" {
-  type        = string
+  type        = list(string)
   description = "public subnet name"
 }
 
 variable "nat_name" {
-  type        = string
+  type        = list(string)
   description = "Name of Nat Gateway"
 }
 
 variable "pvt_rt_ame" {
-  type        = string
+  type        = list(string)
   description = "Name of Pvt Rpoute table"
 }
 
 variable "pvt_subnet_name" {
-  type        = string
+  type        = list(string)
   description = "Name of private subnets"
 }
 
@@ -162,4 +162,9 @@ variable "alb_type" {
   type        = bool
   description = "Type of ALB"
   default     = false
+}
+variable "subnet_tags" {
+  description = "Additional tags for the VPC"
+  type        = map(string)
+  default     = {}
 }

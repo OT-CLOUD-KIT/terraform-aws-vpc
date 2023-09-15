@@ -37,7 +37,7 @@ module "publicRouteTable" {
   version    = "0.0.1"
   cidr       = "0.0.0.0/0"
   gateway_id = aws_internet_gateway.igw[count.index].id
-  name    = format("%s", var.pub_rt_name)
+  name       = format("%s", var.pub_rt_name)
   vpc_id     = aws_vpc.main.id
   tags       = var.tags
 }
@@ -46,8 +46,8 @@ module "PublicSubnets" {
   count              = var.enable_igw_publicRouteTable_PublicSubnets_resource == true ? 1 : 0
   source             = "OT-CLOUD-KIT/subnet/aws"
   version            = "0.0.2"
-  availability_zones = var.avaialability_zones
-  subnet_name        = format("%s", var.pub_subnet_name)
+  availability_zones = var.availability_zones
+  subnet_name        = var.pub_subnet_name
   route_table_id     = module.publicRouteTable[count.index].id
   subnets_cidr       = var.public_subnets_cidr
   vpc_id             = aws_vpc.main.id
@@ -55,33 +55,33 @@ module "PublicSubnets" {
 }
 
 module "nat-gateway" {
-  count              = var.enable_nat_privateRouteTable_PrivateSubnets_resource == true ? 1 : 0
+  count              = length(var.availability_zones)
   source             = "OT-CLOUD-KIT/nat-gateway/aws"
   version            = "0.0.2"
-  subnets_for_nat_gw = module.PublicSubnets[count.index].ids
-  nat_name           = var.nat_name
+  subnets_for_nat_gw = [module.PublicSubnets[0].ids[count.index]]
+  nat_name           = element(var.nat_name, count.index)
   tags               = var.tags
 }
 
 module "privateRouteTable" {
-  count      = var.enable_nat_privateRouteTable_PrivateSubnets_resource == true ? 1 : 0
+  count      = length(var.public_subnets_cidr)
   source     = "OT-CLOUD-KIT/route-table/aws"
   version    = "0.0.1"
   cidr       = "0.0.0.0/0"
   gateway_id = module.nat-gateway[count.index].ngw_id
-  name       = format("%s", var.pvt_rt_ame)
+  name       = element(var.pvt_rt_ame, count.index)
   vpc_id     = aws_vpc.main.id
   tags       = var.tags
 }
 
 module "PrivateSubnets" {
-  count              = var.enable_nat_privateRouteTable_PrivateSubnets_resource == true ? 1 : 0
+  count              = length(var.private_subnets_cidr)
   source             = "OT-CLOUD-KIT/subnet/aws"
   version            = "0.0.2"
-  availability_zones = var.avaialability_zones
-  subnet_name        = format("%s", var.pvt_subnet_name)
-  route_table_id     = module.privateRouteTable[count.index].id
-  subnets_cidr       = var.private_subnets_cidr
+  availability_zones = [var.availability_zones[(count.index + 2) % 2]]
+  subnet_name        = [element(var.pvt_subnet_name, count.index)]
+  route_table_id     = module.privateRouteTable[(count.index + 2) % 2].id
+  subnets_cidr       = [var.private_subnets_cidr[count.index]]
   vpc_id             = aws_vpc.main.id
   tags               = var.tags
 }

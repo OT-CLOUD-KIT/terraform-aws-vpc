@@ -16,7 +16,7 @@ module "network_skeleton" {
   public_subnets_cidr                                  = var.public_subnets_cidr
   pvt_zone_name                                        = var.pvt_zone_name
   private_subnets_cidr                                 = var.private_subnets_cidr
-  avaialability_zones                                  = var.avaialability_zones
+  availability_zones                                  = var.availability_zones
   logs_bucket                                          = var.logs_bucket
   logs_bucket_arn                                      = var.logs_bucket_arn
   tags                                                 = var.tags
